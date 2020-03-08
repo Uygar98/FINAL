@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>WebRTC Medical App - Dial-A-Doc</title>
+	
+
+
+    <!-- Bootstrap -->
+    <link href='http://fonts.googleapis.com/css?family=Raleway:700,400,300' rel='stylesheet' type='text/css'>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+
+  </head>
+  <body>
+
+	<!-- This is the top level navigation, it stays visible throughout the app -->
+    <nav class="navbar navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="javascript:void(0)"><i class="fa fa-heartbeat"></i> Dial-A-Doc</a>
+        </div>
+        <ul class="nav navbar-nav menu-right">
+        </ul>
+      </div>
+    </nav>
+    
+	<!-- This is the initial landing page where you choose to enter as a patient or as a doctor -->
+    <div id="landingPage" class="mastHead landing-page">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-8 col-xs-offset-2 ">
+            <div class="starter-text">
+              <h1><strong>WebRTC</strong> Messaging Application</h1>
+              <p class="lead">Coursework</p>
+            </div>
+            <div class="starter-call-to-action">
+              <a href="" id="enterAsStudent" class="call-group">Enter As Student</a>
+              <a href="" id="enterAsTeacher" class="call-group">Enter As Teacher</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+	
+    <div id="studentEntry" class="mastHead" style="display: none;">
+      <div class="signin-to-app">
+        <h2>Welcome</h2>
+        
+        <div id="requestTeacherForm">
+		  <p>You will be connected to a teacher shorlty<br>tell us some basic information…</p>
+		  
+		  <form class="form-inline">
+            <div class="form-group">
+              <input id="studentName" class="input-styled" type="text" class="form-control" id="" value="Your Name">
+              <button id="requestTeacher" class="input-styled" type="button">Request a Teacher</button>
+            </div>
+          </form>
+		</div>
+		
+        <div id="waitingForTeacher" class="loading-wrap" style="display: none;">
+          <span>Waiting for a teacher to arrive...</span>
+          <div class="progress">
+            <div id="waitingForTeacherProgress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+              <span class="sr-only"></span>
+            </div>
+          </div>
+        </div>
+		
+        <div id="teacherListing" class="teacher-info" style="display: none;">
+          
+          <div class="teach-text">
+            <span class="name">Teacher will see you now</span>
+            <span class="class">class: <strong>Snakebites</strong></span>
+            <button id="callTeacher" class="input-styled" type="button">Call the doc</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+	
+    <div id="teacherSignup" class="mastHead" style="display: none;">
+      <div class="signin-to-app signin-teacher">
+        <h2>What’s up Doc?</h2>
+        <p>There are probably students<br><small>Just enter your name and press the button to wait for a call!</small></p>
+        
+		<div id="teacherSignupForm">
+          <form class="form-inline">
+            <div class="form-group">
+              <input class="input-styled" type="text" class="form-control" id="teacherName" value="Your Name">
+              <input class="input-styled" type="text" class="form-control" id="teacherClass" value="Your class">
+              <button id="teacherSignupButton" class="input-styled" type="button">Wait for students</button>
+            </div>
+          </form>
+		</div>
+		
+        <div id="waitingForStudent" class="loading-wrap" style="display: none;">
+          <span>Waiting for patients to contact you...</span>
+          <div class="progress">
+            <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+              <span class="sr-only"></span>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <div id="videoPage" class="mastHead" style="display: none;">
+      <div class="video-page-holder video-page-holder-horizontal">
+        <div class="left">
+          <div class="video-wrap">
+            <div class="main-video">
+              <video id="mainVideoTag" class="" autoplay></video>
+            </div>
+            <div class="small-video">
+              <video id="smallVideoTag" autoplay></video>
+            </div>
+          </div>
+          
+          <div class="actions-holder">
+            <a class="input-styled" href="javascript:void(0)">Mute Myself</a>
+            <a class="input-styled" href="javascript:void(0)">Pause Video</a>
+            <a class="input-styled" href="javascript:void(0)" style="display: none;">Share Screen</a>
+          </div>
+
+          <form class="send-file form-inline">
+            <div class="form-group">
+              <input class="input-styled" type="text" class="form-control" id="" value="File">
+              <button class="input-styled" type="button">Send File</button>
+            </div>
+          </form>
+  
+          <form class="send-message form-inline">
+            <div class="form-group">
+              <input class="input-styled" type="text" class="form-control" id="" value="Type Message">
+              <button class="input-styled" type="button">Send Message</button>
+            </div>
+          </form>
+
+        </div>
+        
+        <div class="right">
+  
+          <div class="message-holder">
+            <div id="messageInName" class="message-in"></div>
+            <div id="messageOutName" class="message-out"></div>
+
+
+            <div class="message-in">
+              <span>This is a message This is a message This is a message This is a message This is a message <a href="#">hello link</a></span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+            <div class="message-in">
+              <span>This is a message</span>
+            </div>
+            <div class="message-out">
+              <span>This is a message</span>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+	
+	<!-- Our project javascript files -->
+	<script src="js/webrtc.js"></script>
+	<script src="js/app.js"></script>
+  </body>
+</html>
